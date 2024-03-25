@@ -1,4 +1,4 @@
-import {createPhotos} from './data.js';
+import {createPhotos} from './photo-create.js';
 
 // получаем секцию для вставки фотографий
 const pictures = document.querySelector('.pictures');
@@ -28,4 +28,6 @@ photos.forEach((photo) => {
 });
 
 // из фрагмента отрисовываем фотографии на страницу
-pictures.appendChild(photosFragment);
+pictures.append(photosFragment);
+
+export {pictures, photos};

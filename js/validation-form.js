@@ -1,4 +1,6 @@
 import { isEscapeKey } from './util.js';
+import { setScale, defaultScale } from './edit-image.js';
+
 const uploadForm = document.querySelector('.img-upload__form'); // форма отправки информации о фотографии на сервер
 const uploadInput = document.querySelector('.img-upload__input'); // поле для загрузки фотографии
 const uploadOverlay = document.querySelector('.img-upload__overlay'); // модальное окно редактирования фотографии
@@ -109,6 +111,10 @@ const openUploadForm = () => {
 };
 // функция закрывает форму загрузки
 const closeUploadForm = () => {
+  document.querySelector('#effect-none').checked = true; // выбираем radio button с оригинальным эффектом
+  setScale(defaultScale); // установка дефолтного масштаба изображения
+  // eslint-disable-next-line no-undef
+  setEffect(defaultEffect); // установка дефолтного эффекта изображения
   uploadOverlay.classList.add('hidden');
   uploadInput.value = '';
   hashtagInput.value = '';

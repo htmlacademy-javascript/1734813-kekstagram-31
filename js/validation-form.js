@@ -1,5 +1,5 @@
 import { isEscapeKey } from './util.js';
-import { setScale, defaultScale } from './edit-image.js';
+import { setScale, defaultScale } from './image-editing.js';
 import { sendData, submitButtonText } from './get-api.js';
 
 const uploadForm = document.querySelector('.img-upload__form'); // форма отправки информации о фотографии на сервер
@@ -18,6 +18,9 @@ const hashtagErrorMessages = {
   2: 'Хэш-теги не должны повторяться.',
   3: 'Нельзя указать больше пяти хэш-тегов.'
 };
+
+const FILE_TYPES = ['gif', 'jpeg', 'jpg', 'png'];
+
 // обработчик нажатия клавиши Esc
 const onDocumentKeydown = (evt) => {
   if (isEscapeKey(evt)) {
@@ -101,11 +104,13 @@ pristine.addValidator(
 // функция подставляет загружаемое фото в форму предварительного просмотра
 const getPhotoPreview = (evt) => {
   const file = evt.target.files[0]; // получаем первый файл, выбранный пользователем в input элементе
-  if (file) {
+  const fileName = file.name.toLowerCase();
+  const matches = FILE_TYPES.some((it) => fileName.endsWith(it));
+  if (matches) {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.addEventListener('load', (e) => {
       imgUploadPreview.src = e.target.result;
-    };
+    });
     reader.readAsDataURL(file);
   }
 };

@@ -1,6 +1,6 @@
-import {initScale, initSlider} from './image-editing.js';
+import {initScale, initSlider} from './photo-editing.js';
 import {isEscapeKey, showMessage, currentMessage } from './util.js';
-import {sendData } from './get-api.js';
+import {sendData } from './api.js';
 const MAX_HASHTAGS = 5;
 
 const imgUploadForm = document.querySelector('.img-upload__form');
@@ -70,6 +70,7 @@ const validateCommentMaxSymbol = (value) =>{
     return true;
   }
 };
+
 pristine.addValidator(
   hashtagInput,
   validateFormatHashtags,

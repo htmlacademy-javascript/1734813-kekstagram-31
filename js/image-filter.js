@@ -1,4 +1,4 @@
-import { renderPhotos, photos } from './drawing-thumbnails.js';
+import { renderPhotos, photos } from './drawing-mini.js';
 import { debounce } from './util.js';
 
 const filtersForm = document.querySelector('.img-filters__form');

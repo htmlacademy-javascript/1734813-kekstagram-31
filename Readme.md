@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм»
 
-* Студент: [savven0k](https://up.htmlacademy.ru/javascript/31/user/1734813).
-* Наставник: `Павел Ившин`.
+* Студент: [Георгий](https://up.htmlacademy.ru/javascript/31/user/382085).
+* Наставник: [Елизавета](https://htmlacademy.ru/profile/id1472547).
 
 ---
 

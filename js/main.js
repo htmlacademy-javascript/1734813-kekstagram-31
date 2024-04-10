@@ -1,4 +1,4 @@
-import './drawing.js';
+import './drawing-mini.js';
 import './validation-form.js';
 import './image-editing.js';
-import './image-filter.js'
+import './image-filter.js';

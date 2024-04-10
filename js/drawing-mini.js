@@ -51,4 +51,4 @@ getData()
     filters.classList.remove('img-filters--inactive');
   });
 
-  export { pictures, photos, renderPhotos };
+export { pictures, photos, renderPhotos };

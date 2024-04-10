@@ -1,8 +1,15 @@
-/* eslint-disable no-console */
-import './util.js';
-import './drawing-mini.js';
-import './drawing-full-size-image.js';
-import './validation-form.js';
-import './get-api.js';
-import './image-editing.js';
+import { fetchPicturesData } from './storage';
+import { renderPicturesList } from './images-list';
+import { showDataErrorToast } from './pop-up-errors';
+import './post';
+import './upload-form';
+import * as filters from './image-filters';
 
+fetchPicturesData()
+  .then(() => {
+    filters.init();
+    renderPicturesList();
+  })
+  .catch(() => {
+    showDataErrorToast();
+  });

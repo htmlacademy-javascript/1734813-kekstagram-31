@@ -1,5 +1,5 @@
 import { isEscapeKey } from './util.js';
-import { btnUploadSubmit } from './form-validation.js';
+import { btnUploadSubmit } from './validation-form.js';
 
 const SERVER_URL = 'https://31.javascript.htmlacademy.pro/kekstagram';
 

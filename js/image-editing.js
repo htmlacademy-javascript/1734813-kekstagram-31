@@ -1,4 +1,8 @@
-const photoEffects = {
+const MIN_SCALE_VALUE = 25;
+const MAX_SCALE_VALUE = 100;
+const STEP_SCALE_VALUE = 25;
+const DEFAULT_SCALE_VALUE = 100;
+const PhotoEffects = {
   CHROME: 'chrome',
   SEPIA: 'sepia',
   MARVIN: 'marvin',
@@ -6,91 +10,96 @@ const photoEffects = {
   HEAT: 'heat',
   ORIGINAL: 'none'
 };
-const scaleValue = document.querySelector('.scale__control--value'); // масштаб картинки в процентах
-const btnScaleMinus = document.querySelector('.scale__control--smaller'); // кнопка "-"
-const btnScalePlus = document.querySelector('.scale__control--bigger'); // кнопка "+"
-const imgPreview = document.querySelector('.img-upload__preview'); // превью загружаемой картинки
-const imgEffectLevel = document.querySelector('.img-upload__effect-level'); // контейнер слайдера
-const effectValue = imgEffectLevel.querySelector('.effect-level__value'); // поле для записи интенсивности эффекта на картинке
-const effectSlider = imgEffectLevel.querySelector('.effect-level__slider'); // ползунок слайдера
-const effectsList = document.querySelector('.effects__list'); // иконки с эффектами
-const maxScale = 100; // максимальный масштаб
-const minScale = 25; // минимальный масштаб
-const defaultScale = 100; // начальное значение масштаба
-const stepScale = 25; // шаг изменения масштаба
-let currentScale; // текущее значение масштаба
-const defaultEffect = photoEffects.ORIGINAL; // начальный эффект "Оригинал"
-let currentEffect; // текущий эффект
-// функция для установки масштаба изображения
+
+const scaleValue = document.querySelector('.scale__control--value');
+const btnScaleMinus = document.querySelector('.scale__control--smaller');
+const btnScalePlus = document.querySelector('.scale__control--bigger');
+const photoPreview = document.querySelector('.img-upload__preview');
+const photoEffectLevel = document.querySelector('.img-upload__effect-level');
+const effectValue = photoEffectLevel.querySelector('.effect-level__value');
+const effectSlider = photoEffectLevel.querySelector('.effect-level__slider');
+const effectsList = document.querySelector('.effects__list');
+let currentScale = 100;
+let currentEffect = 'ORIGINAL';
 const setScale = (scale) => {
-  currentScale = scale;
-  scaleValue.value = `${currentScale}%`;
-  imgPreview.style.transform = `scale(${currentScale / maxScale})`;
+  scaleValue.value = `${scale}%`;
+  photoPreview.style.transform = `scale(${scale / MAX_SCALE_VALUE})`;
 };
-// функция для изменения масштаба изображения
-const changeScale = (deltaScale) => {
-  let tempScale = currentScale;
-  tempScale += deltaScale;
-  if (tempScale > maxScale) {
-    tempScale = maxScale;
-  } else if (tempScale < minScale) {
-    tempScale = minScale;
+const changeScaleValue = (stepvalue) => {
+  currentScale += stepvalue;
+  if (currentScale > MAX_SCALE_VALUE) {
+    currentScale = MAX_SCALE_VALUE;
+  } else if (currentScale < MIN_SCALE_VALUE) {
+    currentScale = MIN_SCALE_VALUE;
   }
-  setScale(tempScale);
+  setScale(currentScale);
 };
-// обработчики событий на кнопки "+" и "-"
-btnScalePlus.addEventListener('click', () => changeScale(stepScale));
-btnScaleMinus.addEventListener('click', () => changeScale(-stepScale));
-// инициализация слайдера
+const initScale = () => {
+  currentScale = 100;
+  setScale(DEFAULT_SCALE_VALUE);
+};
+btnScaleMinus.addEventListener('click', () => changeScaleValue(-STEP_SCALE_VALUE));
+btnScalePlus.addEventListener('click', () => changeScaleValue(STEP_SCALE_VALUE));
+///////////////////////////////////////SLIDER/////////////////////////////////////////////////////
 noUiSlider.create(effectSlider, {
   range: {
     min: 0,
-    max: 100,
+    max: 100
   },
   start: 100,
   step: 1,
   connect: 'lower',
+  format: {
+    to: function (value) {
+      if (Number.isInteger(value)) {
+        return value.toFixed(0);
+      }
+      return value.toFixed(1);
+    },
+    from: function (value) {
+      return parseFloat(value);
+    }
+  }
 });
-// функция для установки эффекта и степени насыщенности к картинке
-const setEffect = (effect, value) => {
+const initSlider = () => {
+  photoPreview.style.filter = '';
+  photoEffectLevel.classList.add('hidden');
+  currentEffect = 'ORIGINAL';
+};
+const setPhotoEffect = (effect, value) => {
   currentEffect = effect;
   effectValue.value = value;
   switch (effect) {
-    case photoEffects.CHROME:
-      imgPreview.style.filter = `grayscale(${value / 100})`;
+    case PhotoEffects.CHROME:
+      photoPreview.style.filter = `grayscale(${value / 100})`;
       break;
-    case photoEffects.SEPIA:
-      imgPreview.style.filter = `sepia(${value / 100})`;
+    case PhotoEffects.SEPIA:
+      photoPreview.style.filter = `sepia(${value / 100})`;
       break;
-    case photoEffects.MARVIN:
-      imgPreview.style.filter = `invert(${value}%)`;
+    case PhotoEffects.MARVIN:
+      photoPreview.style.filter = `invert(${value}%)`;
       break;
-    case photoEffects.PHOBOS:
-      imgPreview.style.filter = `blur(${value / 100 * 3}px)`;
+    case PhotoEffects.PHOBOS:
+      photoPreview.style.filter = `blur(${value / 100 * 3}px)`;
       break;
-    case photoEffects.HEAT:
-      imgPreview.style.filter = `brightness(${value / 100 * 2 + 1})`;
+    case PhotoEffects.HEAT:
+      photoPreview.style.filter = `brightness(${value / 100 * 2 + 1})`;
       break;
-    case photoEffects.ORIGINAL:
-      imgEffectLevel.classList.add('hidden');
-      imgPreview.style.filter = '';
+    case PhotoEffects.ORIGINAL:
+      photoEffectLevel.classList.add('hidden');
+      photoPreview.style.filter = '';
       break;
   }
-  if (effect !== photoEffects.ORIGINAL) {
-    imgEffectLevel.classList.remove('hidden');
+  if (effect !== PhotoEffects.ORIGINAL) {
+    photoEffectLevel.classList.remove('hidden');
   }
 };
-// обработчик события для переключения эффектов
 effectsList.addEventListener('change', (evt) => {
   const effect = evt.target.value;
   effectSlider.noUiSlider.set(100);
-  setEffect(effect, 100);
+  setPhotoEffect(effect, 100);
 });
-
-// обработчик события для изменения уровня эффекта
-effectSlider.noUiSlider.on('update', (values, handle) => {
-  const value = values[handle];
-  setEffect(currentEffect, value);
+effectSlider.noUiSlider.on('update', (values) => {
+  setPhotoEffect(currentEffect, values);
 });
-
-export { setScale, defaultScale, setEffect, defaultEffect };
+export {initScale, initSlider};

@@ -1,66 +1,61 @@
-import { renderPhotos, photos } from './drawing-thumbnails.js';
+
 import { debounce } from './util.js';
+import { getUsersPhotoPosts, createPhotoPost } from './drawing-mini.js';
 
+const TIMEOUT = 500;
+const Filtres = {
+  DEFAULT: 'filter-default',
+  SHUFFLE: 'filter-random',
+  DISCUSSED: 'filter-discussed'
+};
 const filtersForm = document.querySelector('.img-filters__form');
-const filtersButtons = document.querySelectorAll('.img-filters__button');
-const filterDefault = filtersForm.querySelector('#filter-default');
-const filterRandom = filtersForm.querySelector('#filter-random');
-const filterDiscussed = filtersForm.querySelector('#filter-discussed');
+const photoFilterButtons = filtersForm.querySelectorAll('.img-filters__button');
+const btnPhotoFilterDefault = filtersForm.querySelector('#filter-default');
+const btnPhotoFilterShuffle = filtersForm.querySelector('#filter-random');
+const btnPhotoFilterDiscussed = filtersForm.querySelector('#filter-discussed');
 
-// текущий активный фильтр
-let currentActiveFilter = 'default';
+let currentFilter = 'filter-default';
 
-// функция для получения случайных фотографий
-const getRandomPhotos = (count) => {
-  const randomPhotos = [...photos];
-  randomPhotos.sort(() => Math.random() - 0.5);
-  return randomPhotos.slice(0, count);
+// Алгоритм тасования Фишера — Йетса. Суть заключается в том, чтобы проходить по массиву
+// в обратном порядке и менять местами каждый элемент со случайным элементом, который
+// находится перед ним.
+const getShufflePhoto = (array, count = 10) => {
+  const shuffleArray = [...array];
+  for (let i = shuffleArray.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffleArray[i], shuffleArray[j]] = [shuffleArray[j], shuffleArray[i]];
+  }
+  return shuffleArray.slice(0, count);
 };
 
-// функция для получения фотографий, отсортированных по количеству комментариев
-const getDiscussedPhotos = () => {
-  const discussedPhotos = [...photos];
+const getDiscussedPhoto = (array) => {
+  const discussedPhotos = [...array];
   discussedPhotos.sort((a, b) => b.comments.length - a.comments.length);
   return discussedPhotos;
 };
 
-// функция для обработки фильтрации фотографий
-const handleFilterChange = (filterType) => {
-  // если нажата активная кнопка фильтра, ничего не делаем
-  if (filterType === currentActiveFilter) {
+const changeFilterPhoto = (evt) => {
+  if (evt.target.id === currentFilter) {
     return;
   }
-
-  // удаляем класс активности у всех кнопок фильтров
-  filtersButtons.forEach((button) => {
-    button.classList.remove('img-filters__button--active');
+  currentFilter = evt.target.id;
+  photoFilterButtons.forEach((btn) => {
+    btn.classList.remove('img-filters__button--active');
   });
-
-  // добавляем класс активности кнопке выбранного фильтра
-  document.querySelector(`#filter-${filterType}`).classList.add('img-filters__button--active');
-
-  // обновляем текущий активный фильтр
-  currentActiveFilter = filterType;
-
-  // обрабатываем фильтры
-  let filteredPhotos;
-  switch (filterType) {
-    case 'default':
-      filteredPhotos = photos;
-      break;
-    case 'random':
-      filteredPhotos = getRandomPhotos(10);
-      break;
-    case 'discussed':
-      filteredPhotos = getDiscussedPhotos();
-      break;
+  evt.target.classList.add('img-filters__button--active');
+  let filteredPhoto;
+  if(evt.target.id === Filtres.DEFAULT){
+    filteredPhoto = getUsersPhotoPosts();
   }
-
-  // устраняем дребезг при перерисовке изображений
-  debounce(renderPhotos, 500)(filteredPhotos);
+  if(evt.target.id === Filtres.SHUFFLE){
+    filteredPhoto = getShufflePhoto(getUsersPhotoPosts());
+  }
+  if(evt.target.id === Filtres.DISCUSSED){
+    filteredPhoto = getDiscussedPhoto(getUsersPhotoPosts());
+  }
+  debounce(createPhotoPost, TIMEOUT)(filteredPhoto);
 };
 
-// обработчики событий для фильтров
-filterDefault.addEventListener('click', () => handleFilterChange('default'));
-filterRandom.addEventListener('click', () => handleFilterChange('random'));
-filterDiscussed.addEventListener('click', () => handleFilterChange('discussed'));
+btnPhotoFilterDefault.addEventListener('click', (evt) => changeFilterPhoto(evt));
+btnPhotoFilterShuffle.addEventListener('click', (evt) => changeFilterPhoto(evt));
+btnPhotoFilterDiscussed.addEventListener('click', (evt) => changeFilterPhoto(evt));

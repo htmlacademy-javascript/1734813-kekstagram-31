@@ -1,104 +1,50 @@
-import { isEscapeKey } from './util.js';
-import { btnUploadSubmit } from './validation-form.js';
+import { createPhotoPost, saveApiPhoto, usersPictureList} from './drawing-mini.js';
+import { showMessage } from './util.js';
+import { addPictureListener } from './drawing-full-size-image.js';
 
-const SERVER_URL = 'https://31.javascript.htmlacademy.pro/kekstagram';
+const photoFilters = document.querySelector('.img-filters');
 
-const submitButtonText = {
-  IDLE: 'Опубликовать', // начальное состояние кнопки
-  SENDING: 'Публикую...'
+const NUMBER_PHOTO_POSTS = 25;
+const MIN_PHOTOS_FOR_FILTRES = 2;
+const BASE_URL = 'https://31.javascript.htmlacademy.pro/kekstagram';
+
+const Route = {
+  GET_DATA: '/data',
+  SEND_DATA: ''
 };
-
-// общая функция для создания и показа сообщения
-const showMessage = (templateId, closeButtonSelector) => {
-  const template = document.querySelector(templateId).content.querySelector(`.${templateId.slice(1)}`);
-  const element = template.cloneNode(true);
-  const closeButton = element.querySelector(closeButtonSelector);
-
-  // обработчик клика по произвольной области экрана или нажатия клавиши Esc
-  const clickHandler = (evt) => {
-    evt.stopPropagation(); // предотвращаем всплытие события
-    if (evt.type === 'click' || (evt.type === 'keydown' && isEscapeKey(evt))) {
-      element.remove();
-      document.body.removeEventListener('click', clickHandler);
-      document.body.removeEventListener('keydown', clickHandler);
-    }
-  };
-
-  // обработчик клика по кнопке закрытия
-  if (closeButton) {
-    closeButton.addEventListener('click', (evt) => {
-      evt.stopPropagation(); // предотвращаем всплытие события
-      element.remove();
-      document.body.removeEventListener('click', clickHandler);
-      document.body.removeEventListener('keydown', clickHandler);
+const Method = {
+  GET: 'GET',
+  POST: 'POST'
+};
+const Message = {
+  GET_DATA_ERROR: 'dataLoadError',
+  SEND_DATA_SUCCESS: 'submitSuccess',
+  SEND_DATA_ERROR: 'submitError'
+};
+const load = (route, messageText = null, method = Method.GET, body = null) =>
+  fetch(`${BASE_URL}${route}`, {method, body})
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`Произошла ошибка ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .catch((err) => {
+      showMessage(messageText ?? err.message);
     });
-  }
+const getData = () => load(Route.GET_DATA, Message.GET_DATA_ERROR);
+const sendData = (body) => load(Route.SEND_DATA, Message.SEND_DATA_ERROR, Method.POST, body);
 
-  // добавляем обработчик событий клика и нажатия клавиши Esc
-  document.addEventListener('click', clickHandler);
-  document.addEventListener('keydown', clickHandler);
-  document.body.addEventListener('click', clickHandler);
-  document.body.addEventListener('keydown', clickHandler);
-
-  // добавляем сообщение в конец body
-  document.body.appendChild(element);
-};
-// функция для показа сообщения об ошибке при загрузке данных с сервера
-const showErrorMessage = () => {
-  showMessage('#data-error', null);
-  // удаление сообщения через 5 секунд
-  setTimeout(() => {
-    const errorElement = document.querySelector('.data-error');
-    if (errorElement) {
-      errorElement.remove();
+getData()
+  .then((photos) => {
+    saveApiPhoto(photos.slice(0, NUMBER_PHOTO_POSTS));
+    createPhotoPost(photos.slice(0, NUMBER_PHOTO_POSTS));
+    if(photos.length >= MIN_PHOTOS_FOR_FILTRES){
+      photoFilters.classList.remove('img-filters--inactive');
     }
-  }, 5000);
-};
-// асинхронная функция для получения данных с сервера
-const getData = async () => {
-  try {
-    const response = await fetch(`${SERVER_URL}/data`);
-    if (!response.ok) {
-      throw new Error(`Ошибка загрузки: ${response.status} ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    showErrorMessage();
-    throw error;
-  }
-};
-
-// функция для показа сообщения об ошибке при отправке данных на сервер
-const showErrorSentMessage = () => {
-  showMessage('#error', '.error__button');
-};
-
-// функция для показа сообщения об успешной отправке данных на сервер
-const showSuccessSentMessage = () => {
-  showMessage('#success', '.success__button');
-};
-
-// асинхронная функция для загрузки данных на сервер
-const sendData = async (formElement) => {
-  const formData = new FormData(formElement);
-  try {
-    const response = await fetch(SERVER_URL, {
-      method: 'POST',
-      body: formData,
-    });
-    if (!response.ok) {
-      throw new Error(`Ошибка отправки: ${response.status} ${response.statusText}`);
-    }
-    showSuccessSentMessage();
-    formElement.reset();
-    return await response.json();
-  } catch (error) {
-    showErrorSentMessage();
-    throw new Error(`Ошибка отправки данных: ${error.message}`);
-  } finally {
-    btnUploadSubmit.disabled = false;
-    btnUploadSubmit.textContent = submitButtonText.IDLE;
-  }
-};
-
-export { submitButtonText, getData, sendData };
+    usersPictureList.addEventListener('click', addPictureListener);
+  })
+  .catch((err) => {
+    throw new Error(`Произошла ошибка ${err.status}: ${err.statusText}`);
+  });
+export {getData, sendData};

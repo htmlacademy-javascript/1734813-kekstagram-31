@@ -1,6 +1,7 @@
 import { isEscapeKey } from './util.js';
 import { setScale, defaultScale } from './image-editing.js';
 import { sendData, submitButtonText } from './get-api.js';
+import { setEffect, defaultEffect } from './image-editing.js';
 
 const uploadForm = document.querySelector('.img-upload__form'); // форма отправки информации о фотографии на сервер
 const uploadInput = uploadForm.querySelector('.img-upload__input'); // поле для загрузки фотографии

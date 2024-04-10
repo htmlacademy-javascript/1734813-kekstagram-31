@@ -1,4 +1,4 @@
-import { pictures, photos } from './drawing-thumbnails.js';
+import { pictures, photos } from './drawing-mini.js';
 import { isEscapeKey } from './util.js';
 
 const bigPicture = document.querySelector('.big-picture'); // секция полноэкранного показа изображения
